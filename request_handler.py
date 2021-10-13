@@ -1,8 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from animals import get_all_animals, get_single_animal, create_animal
-from locations import get_all_locations, get_single_location
-from employees import get_single_employee, get_all_employees
-from customers import get_all_customers, get_single_customer
+from animals import get_all_animals, get_single_animal, create_animal, delete_animal
+from customers.request import create_customer
+from employees.request import create_employee
+from locations import get_all_locations, get_single_location, create_location
+from employees import get_single_employee, get_all_employees, create_employee, delete_employee
+from customers import get_all_customers, get_single_customer, create_customer, delete_customer
 import json
 
 # Here's a class. It inherits from another class.
@@ -114,16 +116,22 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
 
         # Initialize new animal
-        new_animal = None
-
+        new_dict = None
+        
         # Add a new animal to the list. Don't worry about
         # the orange squiggle, you'll define the create_animal
         # function next.
         if resource == "animals":
-            new_animal = create_animal(post_body)
+            new_dict = create_animal(post_body)
+        if resource == "customers":
+            new_dict = create_customer(post_body)
+        if resource == "employees":
+            new_dict = create_employee(post_body)
+        if resource == "locations":
+            new_dict = create_location(post_body)
 
         # Encode the new animal and send in response
-        self.wfile.write(f"{new_animal}".encode())
+        self.wfile.write(f"{new_dict}".encode())
 
     # Here's a method on the class that overrides the parent's method.
     # It handles any PUT request.
@@ -132,6 +140,27 @@ class HandleRequests(BaseHTTPRequestHandler):
         """Handles PUT requests to the server
         """
         self.do_POST()
+
+    def do_DELETE(self):
+        # Set a 204 response code
+        self._set_headers(204)
+
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Delete a single animal from the list
+        if resource == "animals":
+            delete_animal(id)
+        if resource == "employees":
+            delete_employee(id)
+        if resource == "locations":
+            delete_employee(id)
+        if resource == "customers":
+            delete_customer(id)
+
+        # Encode the new animal and send in response
+        self.wfile.write("".encode())
+
 
 
 # This function is not inside the class. It is the starting
